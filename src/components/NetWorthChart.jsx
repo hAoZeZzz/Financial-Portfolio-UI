@@ -1,54 +1,97 @@
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import React, { useState, useEffect } from "react";
+import Chart from "react-apexcharts";
+import { BACKEND_URL } from "../assets/CONST";
 
-// 注册 Chart.js 插件
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-function NetWorthChart({ investment }) {
-  // 默认数据：如果没有投资数据，则展示上周的 Net Worth 数据
-  const netWorth = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], // 一周的数据
-    datasets: [
-      {
-        label: "Net Worth",
-        data: [2300000, 2310000, 2320000, 2325000, 2330000, 2340000, 2350000], // 假数据
-        borderColor: "rgb(70, 167, 88)", // 使用你的 brand-primary 颜色
-        backgroundColor: "rgba(70, 167, 88, 0.2)",
-        fill: true,
-        tension: 0.4, // 平滑线条
+function InvestmentCard({ stock }) {
+  // 只存配置，不含数据
+  const [options, setOptions] = useState({
+    chart: {
+      type: 'candlestick',
+      height: 350, 
+      toolbar: {show: false}
+    },
+    xaxis: {
+      type: 'datetime'
+    },
+    yaxis: {
+      tooltip: {
+        enabled: true
+      }
+    },
+    tooltip: {
+      style: {
+        fontSize: '14px',
+        fontFamily: undefined,
+        color: '#222' // 字体颜色
       },
-    ],
+      theme: 'dark'
+    }
+  });
+  // 存数据
+  const [series, setSeries] = useState([{ data: [] }]);
+
+  // 获取股票详情数据
+  const getStockDetails = async (stockCode) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/stocks/getStockInfoList/${stockCode}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+      const respond = await res.json();
+      console.log(respond.data);
+      
+      // 格式化为apexcharts的K线数据格式
+      const formattedData = respond.data.map(item => ({
+        x: new Date(item.datetime),
+        y: [
+          Number(item.open),
+          Number(item.high),
+          Number(item.low),
+          Number(item.close),
+        ]
+      }));
+      setSeries([{ data: formattedData }]);
+      setOptions(prev => ({
+        ...prev,
+        title: {
+          text: `${stock.chineseName} -- K Chart`,
+          align: "left",
+          style: {
+            fontSize: '18px',
+            color: 'rgb(47, 110, 59)'
+          }
+        }
+      }));
+    } catch (error) {
+      console.error("Failed to fetch stock info:", error);
+      setSeries([{ data: [] }]);
+    }
   };
 
-  // 如果 investment 存在，使用其数据，否则使用默认的 netWorth 数据
-  let data;
-  if (investment) {
-    data = {
-      labels: ["7.15", "7.16", "7.17", "7.18", "7.19", "7.20", "7.21", "7.22", "7.23", "7.24"], // 假数据
-      datasets: [
-        {
-          label: investment.name,
-          data: investment.value, // 使用选中的投资的值
-          borderColor: "rgb(70, 167, 88)", // 使用品牌颜色
-          backgroundColor: "rgba(70, 167, 88, 0.2)",
-          fill: true,
-          tension: 0.4, // 平滑线条
-        },
-      ],
-    };
-  } else {
-    // 默认情况下，使用 netWorth 数据
-    data = netWorth;
-  }
+  // stock 更新时触发获取数据
+  useEffect(() => {
+    if (stock?.stockCode) {
+      getStockDetails(stock.stockCode);
+    } else {
+      setSeries([{ data: [] }]);
+    }
+  }, [stock]);
 
   return (
-    <div className="bg-neutral-800 p-6 rounded-lg shadow-md">
-      <h3 className="text-heading-2 text-brand-primary mb-4">
-        {investment ? `Trend Chart - ${investment.name}` : "Net Worth Last Week"}
-      </h3>
-      <Line data={data} options={{ responsive: true }} />
+    <div className="bg-neutral-800 p-4 mb-2 rounded-md shadow-md">
+      <Chart
+        options={options}
+        series={series}
+        type="candlestick"
+        height={400}
+      />
     </div>
   );
 }
 
-export default NetWorthChart;
+export default InvestmentCard;

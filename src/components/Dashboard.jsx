@@ -1,38 +1,65 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InvestmentCard from "./InvestmentCard";
 import NetWorthChart from "./NetWorthChart";
 import ComboCard from "./ComboCard";
 import TopNavBar from "./TopNavBar";
 import PortfolioCard from "./PortfolioCard";
+import { BACKEND_URL } from "../assets/CONST";
 
 function Dashboard() {
-  const investment = [
-    { name: "Beneke Fabricators", value: [23.61, 22.78, 23.46, 24.15, 24.66, 24.79, 25.01, 24.61, 23.99, 24.02] },
-    { name: "Apple Inc.", value: [214.15, 213.14, 212.10, 210.87, 210.57, 210.30, 209.11, 208.62, 211.16, 212.41] },
-    { name: "Tesla Inc.", value: [332.56, 329.74, 334.40, 321.66, 323.15, 312.80, 323.15, 317.06, 318.45, 319.90] },
-    { name: "Microsoft Corporation", value: [505.87, 510.97, 514.64, 511.70, 514.64, 505.27, 505.27, 505.27, 510.06, 506.50] },
-    { name: "Amazon.com Inc.", value: [228.29, 223.52, 223.82, 242.06, 242.52, 219.39, 219.39, 211.99, 211.99, 220.46] },
-    { name: "Alphabet Inc.", value: [190.23, 192.36, 193.36, 207.22, 208.70, 185.94, 184.70, 184.70, 191.51, 191.51] },
-    { name: "Meta Platforms Inc.", value: [713.58, 704.81, 716.19, 738.09, 747.90, 627.06, 626.59, 641.84, 641.84, 640.00] },
-    { name: "NVIDIA Corporation", value: [170.78, 171.26, 173.00, 174.25, 174.25, 158.24, 158.24, 158.24, 170.70, 169.59] },
-    { name: "Netflix Inc.", value: [1176.78, 1230.38, 1232.37, 1339.13, 1341.15, 1209.24, 1209.24, 1233.27, 1246.50, 1250.31] },
-    { name: "Adobe Inc.", value: [372.46, 373.49, 373.72, 373.72, 373.72, 369.44, 369.44, 369.44, 373.49, 373.49] },
-    { name: "Taiwan Semiconductor Manufacturing", value: [240.33, 238.85, 242.68, 242.68, 242.68, 236.40, 236.40, 236.40, 238.85, 238.85] }
-  ];
-
   const portfolios = [
     { name: "portfolio 1" }, { name: "portfolio 2" }, { name: "portfolio 3" }
   ]
+ const [stocks, setStocks] = useState([]);
+  const [paginatedStocks, setPaginatedStocks] = useState([]);
   const [selectedInvestment, setSelectedInvestment] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const totalPages = Math.ceil(investment.length / itemsPerPage);
-  const paginatedInvestment = investment.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(stocks.length / itemsPerPage);
 
-  const handleInvestmentClick = (investment) => {
-    setSelectedInvestment(investment);
+  const handleInvestmentClick = (stock) => {
+    setSelectedInvestment(stock);
   };
+
+  // fetch data of all stocks
+  const getAllStock = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/stocks/getAllStockInfo`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const respond = await res.json();
+      if (respond?.result) {
+        console.log(respond.result);
+        setStocks(respond.result);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stock info:", error);
+    }
+  };
+
+  // fetch data of all portfolios
+  
+  // 初始加载
+  useEffect(() => {
+    getAllStock();
+  }, []);
+
+  // 当 stocks 或 currentPage 改变时重新分页
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = currentPage * itemsPerPage;
+    const paginated = stocks.slice(startIndex, endIndex);
+    setPaginatedStocks(paginated);
+  }, [stocks, currentPage]);
 
   return (
     <div className="min-h-screen bg-neutral-900 text-default-font px-4 py-4 lg:px-8">
@@ -43,8 +70,8 @@ function Dashboard() {
           {/* 左：Stock List */}
           <div className="col-span-1">
             <h2 className="text-2xl font-semibold text-brand-primary mb-4">Stock List</h2>
-            {paginatedInvestment.map((invest, index) => (
-              <InvestmentCard key={index} invest={invest} onClick={() => handleInvestmentClick(invest)} />
+            {paginatedStocks.length > 0 && paginatedStocks.map((stock, index) => (
+              <InvestmentCard key={index} stock={stock} onClick={() => handleInvestmentClick(stock)} />
             ))}
             <div className="flex justify-between items-center mt-4">
               <button
@@ -67,7 +94,7 @@ function Dashboard() {
 
           {/* 右：Net Worth Chart */}
           <div className="col-span-2">
-            <NetWorthChart investment={selectedInvestment} />
+            <NetWorthChart stock={selectedInvestment} />
           </div>
         </div>
 
@@ -83,7 +110,7 @@ function Dashboard() {
 
           {/* 右：ComboCard */}
           <div className="col-span-2">
-            <ComboCard investments={investment} />
+            <ComboCard investments={stocks} />
           </div>
         </div>
       </div>
