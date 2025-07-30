@@ -3,17 +3,16 @@ import InvestmentCard from "./InvestmentCard";
 import NetWorthChart from "./NetWorthChart";
 import ComboCard from "./ComboCard";
 import TopNavBar from "./TopNavBar";
-import PortfolioCard from "./PortfolioCard";
+import PortfoliosList from "./PortfoliosList";
 import { BACKEND_URL } from "../assets/CONST";
 
 function Dashboard() {
-  const portfolios = [
-    { name: "portfolio 1" }, { name: "portfolio 2" }, { name: "portfolio 3" }
-  ]
- const [stocks, setStocks] = useState([]);
+  const [stocks, setStocks] = useState([]);
   const [paginatedStocks, setPaginatedStocks] = useState([]);
   const [selectedInvestment, setSelectedInvestment] = useState(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [portfolioRefreshKey, setPortfolioRefreshKey] = useState(0);
   const itemsPerPage = 6;
 
   const totalPages = Math.ceil(stocks.length / itemsPerPage);
@@ -46,8 +45,6 @@ function Dashboard() {
     }
   };
 
-  // fetch data of all portfolios
-  
   // 初始加载
   useEffect(() => {
     getAllStock();
@@ -103,14 +100,20 @@ function Dashboard() {
           {/* 左：Portfolios */}
           <div className="col-span-1">
             <h2 className="text-2xl font-semibold text-brand-primary mb-4">Portfolios</h2>
-            {portfolios.map((portfolio, index) => (
-              <PortfolioCard key={index} portfolio={portfolio} onClick={() => console.log("Details of Portfolio")} />
-            ))}
+            <PortfoliosList 
+              setSelectedPortfolio={setSelectedPortfolio}
+              selectedPortfolio={selectedPortfolio}
+              refreshKey={portfolioRefreshKey}
+            />
           </div>
 
           {/* 右：ComboCard */}
           <div className="col-span-2">
-            <ComboCard investments={stocks} />
+            <ComboCard 
+              investments={stocks} 
+              selectedPortfolio={selectedPortfolio}
+              onPortfolioCreatedOrUpdated={() => setPortfolioRefreshKey(key => key + 1)}  
+            />
           </div>
         </div>
       </div>
