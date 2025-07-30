@@ -1,10 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import PieChart from "./PieChart";
+import RewardsPopup from "./RewardsPopup";
 import { BACKEND_URL } from "../assets/CONST";
 
 const ComboCard = ({ investments }) => {
   const [portfolioName, setPortfolioName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupContent, setPopupContent] = useState(null);
   // 统一管理 investment 名称和比例
   const [investmentStates, setInvestmentStates] = useState([]);
   // 用 ref 避免频繁渲染导致颜色改变
@@ -59,10 +62,6 @@ const ComboCard = ({ investments }) => {
     );
   };
 
-  useEffect(() => {
-    console.log(investmentStates);
-  }, [investmentStates])
-
   // 重置百分比为平均
   const handleClickReset = () => {
     setInvestmentStates((prev) => {
@@ -91,11 +90,9 @@ const ComboCard = ({ investments }) => {
         });
       }
     });
-
-    console.log(formattedData);
     
     try {
-      const res = await fetch(`${BACKEND_URL}/stocks/createProfolio`, {
+      const res = await fetch(`${BACKEND_URL}/portfolios/createPortfolio`, {
         method:"POST",
         headers: {
           'Content-Type': 'application/json'
@@ -107,7 +104,8 @@ const ComboCard = ({ investments }) => {
         throw new Error('Failed to create portfolio');
       };
       const result = await res.json();
-      console.log(result);
+      setPopupContent(result.data)
+      setShowPopup(true);
       
     } catch (error) {
       console.error("Failed to create a new portfolio:", error);
@@ -219,6 +217,10 @@ const ComboCard = ({ investments }) => {
           />
         </div>
       )}
+      <RewardsPopup
+        content={showPopup ? popupContent : null}
+        onClose={() => setShowPopup(false)}
+      />
     </div>
   );
 };
