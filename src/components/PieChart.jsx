@@ -11,7 +11,7 @@ const PieChart = ({ investmentStates, getInvestmentColor }) => {
   if (!investmentStates || investmentStates.length <= 1) return null;
 
   // 直接用 name 和 percent
-  const labels = investmentStates.map(item => item.name);
+  const labels = investmentStates.map(item => item.chineseName);
   const data = investmentStates.map(item => item.percent);
 
   const pieData = {
