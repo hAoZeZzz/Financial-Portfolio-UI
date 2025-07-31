@@ -156,6 +156,9 @@ const ComboCard = ({ investments, selectedPortfolio, onPortfolioCreatedOrUpdated
       }
     } catch (error) {
       console.error("Failed to create/update portfolio:", error);
+    } finally {
+      setInvestmentStates([]);
+      setPortfolioName("")
     }
   }
 
