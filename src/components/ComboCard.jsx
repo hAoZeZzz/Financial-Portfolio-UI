@@ -69,6 +69,7 @@ const ComboCard = ({ investments, selectedPortfolio, onPortfolioCreatedOrUpdated
           });
           setInvestmentStates(merged);
         } catch (e) {
+          console.error("fetch portfolio with something wrong: ", e);
           setPortfolioName("");
           setInvestmentStates([]);
         }
