@@ -122,7 +122,7 @@ function Dashboard() {
             <ComboCard 
               investments={stocks} 
               selectedPortfolio={selectedPortfolio}
-              onPortfolioCreatedOrUpdated={() => setPortfolioRefreshKey(key => key + 1)}  
+              onPortfolioCreatedOrUpdated={() => {setPortfolioRefreshKey(key => key + 1); setSelectedPortfolio(null);}}  
             />
           </div>
         </div>
