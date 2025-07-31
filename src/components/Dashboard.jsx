@@ -5,6 +5,7 @@ import ComboCard from "./ComboCard";
 import TopNavBar from "./TopNavBar";
 import PortfoliosList from "./PortfoliosList";
 import { BACKEND_URL } from "../assets/CONST";
+import { CiSquarePlus } from "react-icons/ci";
 
 function Dashboard() {
   const [stocks, setStocks] = useState([]);
@@ -99,7 +100,14 @@ function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左：Portfolios */}
           <div className="col-span-1">
-            <h2 className="text-2xl font-semibold text-brand-primary mb-4">Portfolios</h2>
+            <div className="flex flex-row justify-between items-center">
+              <h2 className="text-2xl font-semibold text-brand-primary mb-4">Portfolios</h2>
+              {selectedPortfolio && (
+              <CiSquarePlus 
+                className="font-bold text-brand-primary mr-2 w-8 h-8 cursor-pointer hover:text-brand-700 transition-colors" 
+                onClick={() => {setSelectedPortfolio(null);}}
+              />)}
+            </div>
             <PortfoliosList 
               setSelectedPortfolio={setSelectedPortfolio}
               selectedPortfolio={selectedPortfolio}

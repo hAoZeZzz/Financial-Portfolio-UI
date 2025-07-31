@@ -32,6 +32,7 @@ function InvestmentCard({ stock }) {
 
   // 获取股票详情数据
   const getStockDetails = async (stockCode) => {
+    const name = stockCode === 'sh600519' ? "Kweichow Moutai" : stock.chineseName;
     try {
       const res = await fetch(`${BACKEND_URL}/stocks/getStockInfoList/${stockCode}`, {
         method: "GET",
@@ -47,7 +48,7 @@ function InvestmentCard({ stock }) {
       
       // 格式化为apexcharts的K线数据格式
       const formattedData = respond.data.map(item => ({
-        x: new Date(item.datetime),
+        x: new Date(new Date(item.datetime).getTime() + 8 * 60 * 60 * 1000),
         y: [
           Number(item.open),
           Number(item.high),
@@ -59,7 +60,7 @@ function InvestmentCard({ stock }) {
       setOptions(prev => ({
         ...prev,
         title: {
-          text: `${stock.chineseName} -- K Chart`,
+          text: `${name} -- K Chart`,
           align: "left",
           style: {
             fontSize: '18px',
@@ -78,7 +79,7 @@ function InvestmentCard({ stock }) {
     if (stock?.stockCode) {
       getStockDetails(stock.stockCode);
     } else {
-      setSeries([{ data: [] }]);
+      getStockDetails('sh600519');
     }
   }, [stock]);
 
