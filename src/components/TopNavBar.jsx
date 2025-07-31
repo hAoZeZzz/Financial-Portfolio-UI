@@ -8,7 +8,6 @@ const TopNavBar = () => {
       <div className="text-heading-2 font-heading-2 text-brand-600">
         Investment Dashboard
       </div>
-
       {/* Navigation Links */}
       <nav className="hidden md:flex space-x-8 text-body font-body text-subtext-color">
         <Link to="/" className="hover:text-brand-600 transition-colors duration-200">Home</Link>
