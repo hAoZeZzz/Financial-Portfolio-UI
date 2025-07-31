@@ -6,6 +6,7 @@ import TopNavBar from "./TopNavBar";
 import PortfoliosList from "./PortfoliosList";
 import { BACKEND_URL } from "../assets/CONST";
 import { CiSquarePlus } from "react-icons/ci";
+import NewsTickers from "./NewsTickers";
 
 function Dashboard() {
   const [stocks, setStocks] = useState([]);
@@ -62,7 +63,8 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-neutral-900 text-default-font px-4 py-4 lg:px-8">
       <TopNavBar />
-      <div className="px-6 mt-24 flex flex-col space-y-12">
+      <NewsTickers />
+      <div className="px-6 mt-6 flex flex-col space-y-12">
         {/* 上半部分 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左：Stock List */}
